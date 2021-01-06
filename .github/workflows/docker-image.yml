@@ -22,7 +22,7 @@ jobs:
       if: github.event_name == 'push'
       uses: Azure/docker-login@v1
       with:
-        login-server: acrpullci.azurecr.io
+        login-server: acrcanipullci.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
 
