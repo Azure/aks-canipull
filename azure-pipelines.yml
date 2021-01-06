@@ -1,0 +1,20 @@
+trigger:
+- main
+
+pr: none
+
+pool: "AKS-Elastic-Prod-Pool"
+
+variables:
+- group: aks-prod-registry
+
+steps:
+- bash: scripts/ci-mcr.sh
+  displayName: "build image"
+  env:
+    MCR_REGISTRY: $(MCR_ONBOARDING_ACR_REGISTRY)
+    MCR_USERNAME: $(AKS_ACR_REGISTRY_USERNAME)
+    MCR_PASSWORD: $(AKS_ACR_REGISTRY_PASSWORD)
+    APP: canipull
+    TAG: $(TAG)
+    BUILD_NUMBER: $(Build.BuildNumber)
