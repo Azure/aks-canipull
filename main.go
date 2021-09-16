@@ -108,7 +108,7 @@ func validateMsiAuth(ctx context.Context, acr string, cfg azure.Config, logger *
 	}
 
 	logger.V(2).Info("Kubelet managed identity client ID: %s", cfg.UserAssignedIdentityID)
-	tr := authorizer.NewTokenRetriever(env.ActiveDirectoryEndpoint)
+	tr := authorizer.NewTokenRetriever(env.ActiveDirectoryEndpoint, env.ResourceManagerEndpoint)
 	token, err := tr.AcquireARMTokenMSI(ctx, cfg.UserAssignedIdentityID)
 	if err != nil {
 		logger.V(2).Info("Validating managed identity existance: FAILED")
@@ -139,7 +139,7 @@ func validateServicePrincipalAuth(ctx context.Context, acr string, cfg azure.Con
 		return exitcode.AzureCloudUnknown
 	}
 
-	tr := authorizer.NewTokenRetriever(env.ActiveDirectoryEndpoint)
+	tr := authorizer.NewTokenRetriever(env.ActiveDirectoryEndpoint, env.ResourceManagerEndpoint)
 	token, err := tr.AcquireARMTokenSP(ctx, cfg.AADClientID, cfg.AADClientSecret, cfg.TenantID)
 	if err != nil {
 		logger.V(2).Info("Validating service principal credential: FAILED")
