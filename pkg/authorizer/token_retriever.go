@@ -16,20 +16,21 @@ import (
 )
 
 const (
-	armResource         = "https://management.azure.com/"
 	msiMetadataEndpoint = "http://169.254.169.254/metadata/identity/oauth2/token"
 )
 
 // TokenRetriever is an instance of ManagedIdentityTokenRetriever
 type TokenRetriever struct {
 	metadataEndpoint        string
+	resourceManagerEndpoint string
 	activeDirectoryEndpoint string
 }
 
 // NewTokenRetriever returns a new token retriever
-func NewTokenRetriever(activeDirectoryEndpoint string) *TokenRetriever {
+func NewTokenRetriever(activeDirectoryEndpoint string, resourceManagerEndpoint string) *TokenRetriever {
 	return &TokenRetriever{
 		metadataEndpoint:        msiMetadataEndpoint,
+		resourceManagerEndpoint: resourceManagerEndpoint,
 		activeDirectoryEndpoint: activeDirectoryEndpoint,
 	}
 }
@@ -51,7 +52,7 @@ func (tr *TokenRetriever) AcquireARMTokenSP(ctx context.Context, clientID, clien
 		return "", fmt.Errorf("failed to get OAuth config: %w", err)
 	}
 
-	spt, err := adal.NewServicePrincipalToken(*oauthConfig, clientID, clientSecret, armResource)
+	spt, err := adal.NewServicePrincipalToken(*oauthConfig, clientID, clientSecret, tr.resourceManagerEndpoint)
 	if err != nil {
 		return "", fmt.Errorf("failed to get ARM access token: %w", err)
 	}
@@ -79,7 +80,7 @@ func (tr *TokenRetriever) refreshToken(ctx context.Context, clientID, resourceID
 		parameters.Add("mi_res_id", resourceID)
 	}
 
-	parameters.Add("resource", armResource)
+	parameters.Add("resource", tr.resourceManagerEndpoint)
 	parameters.Add("api-version", "2018-02-01")
 
 	msiEndpoint.RawQuery = parameters.Encode()

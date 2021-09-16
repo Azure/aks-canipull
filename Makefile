@@ -1,6 +1,6 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= mcr.microsoft.com/aks/canipull:v0.0.2-alpha
+IMG ?= mcr.microsoft.com/aks/canipull:v0.0.3-alpha
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
