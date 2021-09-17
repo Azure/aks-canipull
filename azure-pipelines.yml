@@ -3,7 +3,7 @@ trigger:
 
 pr: none
 
-pool: "AKS-Elastic-Prod-Pool"
+pool: "1ES-AKS-Elastic-DevInfra-Prod-Pool"
 
 variables:
 - group: aks-prod-registry
