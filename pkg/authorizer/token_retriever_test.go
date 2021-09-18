@@ -65,7 +65,7 @@ var _ = Describe("Token Retriever Tests", func() {
 
 func newTestTokenRetriever(metadataEndpoint string) *TokenRetriever {
 	return &TokenRetriever{
-		metadataEndpoint: metadataEndpoint,
+		metadataEndpoint:        metadataEndpoint,
 		resourceManagerEndpoint: "https://management.azure.com/",
 	}
 }
