@@ -83,7 +83,7 @@ func main() {
 		os.Exit(exitcode.AzureConfigUnmarshalFailure)
 	}
 
-	if !utils.LocationEquals(acrLocation, cfg.Location) {
+	if !utils.LocationEquals(acrLocation, cfg.Location) && !strings.EqualFold(acrLocation, "chinaeast2")  {
 		logger.V(2).Info("Checking ACR location matches cluster location: FAILED")
 		logger.V(2).Info("ACR location '%s' does not match your cluster location '%s'. This may result in slow image pulls and extra cost.", acrLocation, cfg.Location)
 	}
