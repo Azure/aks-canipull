@@ -58,7 +58,9 @@ func main() {
 	logger.V(2).Info("Canonical name for ACR (%s): %s", acr, cname)
 
 	acrLocation := strings.Split(cname, ".")[1]
-	logger.V(2).Info("ACR location: %s", acrLocation)
+	if !strings.EqualFold(acrLocation, "privatelink")  {
+		logger.V(2).Info("ACR location: %s", acrLocation)
+	}
 
 	azConfigPath := *configPath
 	if *configPath == "" {
@@ -83,7 +85,7 @@ func main() {
 		os.Exit(exitcode.AzureConfigUnmarshalFailure)
 	}
 
-	if !utils.LocationEquals(acrLocation, cfg.Location) && !strings.EqualFold(acrLocation, "chinaeast2")  {
+	if !utils.LocationEquals(acrLocation, cfg.Location) && !strings.EqualFold(acrLocation, "privatelink")  {
 		logger.V(2).Info("Checking ACR location matches cluster location: FAILED")
 		logger.V(2).Info("ACR location '%s' does not match your cluster location '%s'. This may result in slow image pulls and extra cost.", acrLocation, cfg.Location)
 	}
