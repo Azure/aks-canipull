@@ -36,7 +36,7 @@ if [ -z "$acr" ]; then
   exit 1
 fi
 
-image="mcr.microsoft.com/aks/canipull:0.0.3-alpha"
+image="mcr.microsoft.com/aks/canipull:0.0.4-alpha"
 pod="canipull-$(env LC_ALL=C tr -dc a-z0-9 < /dev/urandom | head -c 6)"
 
 overrides="$(
