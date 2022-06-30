@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Azure/aks-canipull/pkg/authorizer"
 	"github.com/Azure/aks-canipull/pkg/utils"
@@ -30,21 +31,27 @@ var (
 )
 
 func main() {
+	ctx := log.WithLogLevel(context.Background(), *logLevel)
+	time.Sleep(5 * time.Second)
+	exitCode := Execute(ctx)
+	os.Exit(exitCode)
+}
+
+func Execute(ctx context.Context) int {
 	flag.Parse()
 
 	if len(flag.Args()) != 1 {
 		fmt.Println("No ACR input. Expect `canipull myacr.azurecr.io`.")
-		return
+		return 0
 	}
 
-	ctx := log.WithLogLevel(context.Background(), *logLevel)
 	acr := flag.Args()[0]
 	logger := log.FromContext(ctx)
 
 	if _, err := net.LookupHost(acr); err != nil {
 		logger.V(2).Info("Checking host name resolution (%s): FAILED", acr)
 		logger.V(2).Info("Failed to resolve specified fqdn %s: %s", acr, err)
-		os.Exit(exitcode.DNSResolutionFailure)
+		return exitcode.DNSResolutionFailure
 	}
 	logger.V(2).Info("Checking host name resolution (%s): SUCCEEDED", acr)
 
@@ -52,13 +59,13 @@ func main() {
 	if err != nil {
 		logger.V(2).Info("Checking CNAME (%s): FAILED", acr)
 		logger.V(2).Info("Failed to get CNAME of the ACR: %s", err)
-		os.Exit(exitcode.DNSResolutionFailure)
+		return exitcode.DNSResolutionFailure
 	}
 
 	logger.V(2).Info("Canonical name for ACR (%s): %s", acr, cname)
 
 	acrLocation := strings.Split(cname, ".")[1]
-	if !strings.EqualFold(acrLocation, "privatelink")  {
+	if !strings.EqualFold(acrLocation, "privatelink") {
 		logger.V(2).Info("ACR location: %s", acrLocation)
 	}
 
@@ -70,34 +77,33 @@ func main() {
 	logger.V(6).Info("Loading azure.json file from %s", azConfigPath)
 	if _, err := os.Stat(azConfigPath); err != nil {
 		logger.V(2).Info("Failed to load azure.json. Are you running inside Kubernetes on Azure? \n")
-		os.Exit(exitcode.AzureConfigNotFound)
+		return exitcode.AzureConfigNotFound
 	}
 
 	var cfg azure.Config
 	configBytes, err := ioutil.ReadFile(azConfigPath)
 	if err != nil {
 		logger.V(2).Info("Failed to read azure.json file: %s \n", err)
-		os.Exit(exitcode.AzureConfigReadFailure)
+		return exitcode.AzureConfigReadFailure
 	}
 
 	if err := json.Unmarshal(configBytes, &cfg); err != nil {
 		logger.V(2).Info("Failed to read azure.json file: %s", err)
-		os.Exit(exitcode.AzureConfigUnmarshalFailure)
+		return exitcode.AzureConfigUnmarshalFailure
 	}
 
-	if !utils.LocationEquals(acrLocation, cfg.Location) && !strings.EqualFold(acrLocation, "privatelink")  {
+	if !utils.LocationEquals(acrLocation, cfg.Location) && !strings.EqualFold(acrLocation, "privatelink") {
 		logger.V(2).Info("Checking ACR location matches cluster location: FAILED")
 		logger.V(2).Info("ACR location '%s' does not match your cluster location '%s'. This may result in slow image pulls and extra cost.", acrLocation, cfg.Location)
 	}
 
 	if cfg.AADClientID == "msi" && cfg.AADClientSecret == "msi" {
 		logger.V(2).Info("Checking managed identity...")
-		os.Exit(validateMsiAuth(ctx, acr, cfg, logger))
-		return
+		return validateMsiAuth(ctx, acr, cfg, logger)
 	}
 
 	logger.V(4).Info("The cluster uses service principal.")
-	os.Exit(validateServicePrincipalAuth(ctx, acr, cfg, logger))
+	return validateServicePrincipalAuth(ctx, acr, cfg, logger)
 }
 
 func validateMsiAuth(ctx context.Context, acr string, cfg azure.Config, logger *log.Logger) int {
