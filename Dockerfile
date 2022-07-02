@@ -1,4 +1,4 @@
-FROM golang:1.13 as builder
+FROM golang:1.18 as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests
@@ -12,9 +12,9 @@ RUN go mod download
 COPY ./ ./
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o canipull main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o canipull main.go
 
-FROM ubuntu
+FROM mcr.microsoft.com/aks/devinfra/base-os-runtime-static:master.220630.1
 WORKDIR /
 COPY --from=builder /workspace/canipull .
 
