@@ -64,6 +64,10 @@ overrides="$(
           {
             "name": "sslcerts",
             "mountPath": "/etc/ssl/certs"
+          },
+          {
+            "name": "sfcerts",
+            "mountPath": "/var/lib/sfcerts"
           }
         ]
       }
@@ -89,6 +93,12 @@ overrides="$(
         "name": "sslcerts",
         "hostPath": {
           "path": "/etc/ssl/certs"
+        }
+      },
+      {
+        "name": "sfcerts",
+        "hostPath": {
+          "path": "/var/lib/sfcerts"
         }
       }
     ]
