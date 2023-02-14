@@ -43,9 +43,6 @@ overrides="$(
   cat <<EOT
 {
   "spec": {
-    "nodeSelector": {
-        "kubernetes.io/hostname": "aks-ubuntu-28616259-vmss000001"
-    },
     "restartPolicy": "Never",
     "hostNetwork": true,
     "containers": [
