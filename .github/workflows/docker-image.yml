@@ -14,13 +14,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
     - name: Build the Docker image
       run: make docker-build
 
     - name: Azure Container Registry Login
       if: github.event_name == 'push'
-      uses: Azure/docker-login@v1
+      uses: Azure/docker-login@83efeb77770c98b620c73055fbb59b2847e17dc0 # v1.0.1
       with:
         login-server: acrcanipullci.azurecr.io
         username: ${{ secrets.ACR_USERNAME }}
