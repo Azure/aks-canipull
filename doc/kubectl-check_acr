@@ -36,6 +36,19 @@ if [ -z "$acr" ]; then
   exit 1
 fi
 
+# The ACR value is embedded into the pod overrides JSON below, so only allow
+# characters that are valid in a DNS host name (e.g. myacr.azurecr.io).
+case "$acr" in
+  *[!A-Za-z0-9.-]* | [.-]* | *[.-] | *..*)
+    echo "Invalid ACR login server: expected a host name such as myacr.azurecr.io"
+    exit 1
+    ;;
+esac
+if [ "${#acr}" -gt 253 ]; then
+  echo "Invalid ACR login server: host name is too long"
+  exit 1
+fi
+
 image="mcr.microsoft.com/aks/canipull:v0.1.0"
 pod="canipull-$(env LC_ALL=C tr -dc a-z0-9 < /dev/urandom | head -c 6)"
 
@@ -59,15 +72,18 @@ overrides="$(
         "volumeMounts": [
           {
             "name": "azurejson",
-            "mountPath": "/etc/kubernetes"
+            "mountPath": "/etc/kubernetes",
+            "readOnly": true
           },
           {
             "name": "sslcerts",
-            "mountPath": "/etc/ssl/certs"
+            "mountPath": "/etc/ssl/certs",
+            "readOnly": true
           },
           {
             "name": "sfcerts",
-            "mountPath": "/var/lib/sfcerts"
+            "mountPath": "/var/lib/sfcerts",
+            "readOnly": true
           }
         ]
       }
